@@ -1,0 +1,29 @@
+<mat-card class="simulation-card">
+  <mat-card-content>
+
+    <table class="chess-board">
+      <tr *ngFor="let row of grid; let rowIndex = index">
+        <td *ngFor="let cell of row; let colIndex = index"
+            [ngClass]="{
+              'cell': true,
+              'has-points': cell > 0 && cell <= 10,
+              'multiplier': cell === 20,
+              'white-horse': cell === 11,
+              'black-horse': cell === 12
+            }">
+
+          <!-- Imagen para el Caballo Negro -->
+          <ng-container *ngIf="cell === 12">
+            <img ngSrc="/assets/seahorse_black.png" alt="" width="10" height="10">
+          </ng-container>
+          
+          <ng-container *ngIf="cell === 11">
+            <img ngSrc="/assets/seahorse_white.png" alt="" width="10" height="10">
+          </ng-container>
+          <ng-container *ngIf="cell === 20">x2</ng-container>
+          <ng-container *ngIf="cell > 0 && cell <= 10">{{ cell }}</ng-container>
+        </td>
+      </tr>
+    </table>
+  </mat-card-content>
+</mat-card>
