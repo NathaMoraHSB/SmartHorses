@@ -1,0 +1,29 @@
+<div class="game-container">
+  <!-- Grid Component -->
+  <app-grid [grid]="grid"></app-grid>
+
+  <!-- Cards for Players -->
+  <div class="players-cards">
+    <!-- White Horse Card -->
+    <mat-card class="player-card">
+      <mat-card-header>
+        <mat-card-title>White Horse</mat-card-title>
+        <mat-card-subtitle>Jugador: IA 1</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Puntos acumulados: {{ whiteHorsePoints }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Black Horse Card -->
+    <mat-card class="player-card">
+      <mat-card-header>
+        <mat-card-title>Black Horse</mat-card-title>
+        <mat-card-subtitle>Jugador: IA 2</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Puntos acumulados: {{ blackHorsePoints }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

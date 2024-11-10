@@ -3,6 +3,7 @@
   width: 100%;
   max-width: 400px;
   margin: auto;
+  table-layout: fixed; /* Agregado para fijar el tamaño de las celdas */
 }
 
 .cell {
@@ -12,6 +13,7 @@
   vertical-align: middle;
   border: 1px solid #ddd;
   font-size: 1.2em;
+  box-sizing: border-box; /* Asegura que el tamaño incluya el borde */
 }
 
 .has-points {
@@ -32,3 +34,14 @@
   background-color: #000;
   color: #fff;
 }
+
+.horse-image, .multiplier-image {
+  width: 16px;
+  height: 16px;
+}
+
+.chess-board .cell {
+  text-align: center;
+  vertical-align: middle;
+}
+

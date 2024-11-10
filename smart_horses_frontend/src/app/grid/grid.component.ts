@@ -1,15 +1,20 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Input} from '@angular/core';
 import {MatCard, MatCardContent} from "@angular/material/card";
-import {NgClass, NgOptimizedImage} from "@angular/common";
+import {NgClass} from "@angular/common";
 import { CommonModule } from '@angular/common';
+import {HttpClientModule} from "@angular/common/http";
+import {MatButtonModule} from "@angular/material/button";
 
 @Component({
   selector: 'app-grid',
   standalone: true,
   imports: [
-    MatCard,
+    NgClass,
+    CommonModule,
+    HttpClientModule,
+    MatButtonModule,
     MatCardContent,
-    NgClass, CommonModule, NgOptimizedImage
+    MatCard,
   ],
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.css'
@@ -17,16 +22,8 @@ import { CommonModule } from '@angular/common';
 
 export class GridComponent implements OnInit {
 
-  grid: number[][] = [
-    [8, 0, 0, 0, 4, 0, 20, 0],
-    [0, 20, 1, 0, 0, 0, 0, 0],
-    [0, 9, 0, 0, 12, 0, 20, 0],
-    [0, 0, 7, 0, 0, 3, 0, 0],
-    [10, 0, 0, 0, 0, 0, 6, 0],
-    [20, 0, 0, 0, 0, 0, 0, 0],
-    [0, 11, 0, 5, 0, 0, 2, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0]
-  ];
+  @Input() grid: number[][] = [];
+
 
   ngOnInit(): void {
 

@@ -12,14 +12,14 @@
               'black-horse': cell === 12
             }">
 
-          <!-- Imagen para el Caballo Negro -->
-          <ng-container *ngIf="cell === 12">
-            <img ngSrc="/assets/seahorse_black.png" alt="" width="10" height="10">
-          </ng-container>
-          
           <ng-container *ngIf="cell === 11">
-            <img ngSrc="/assets/seahorse_white.png" alt="" width="10" height="10">
+            <img src="/assets/seahorse_white.png" alt="W" class="horse-image">
           </ng-container>
+
+          <ng-container *ngIf="cell === 12">
+            <img src="/assets/seahorse_black.png" alt="B" class="horse-image">
+          </ng-container>
+
           <ng-container *ngIf="cell === 20">x2</ng-container>
           <ng-container *ngIf="cell > 0 && cell <= 10">{{ cell }}</ng-container>
         </td>
