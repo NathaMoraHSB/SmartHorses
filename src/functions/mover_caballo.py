@@ -1,5 +1,5 @@
 #mover_caballo
-from movimientos_posibles import movimientos_posibles
+from .movimientos_posibles import movimientos_posibles
 
 def mover_caballo(matrix, x, y, por_dos=False):
     """

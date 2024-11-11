@@ -2,7 +2,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from src.functions.random_matrix import random_matrix
-from src.functions.puntos_peor_caso import simular_partida
+from src.functions.simular_partida import simular_partida
+
 
 app = Flask(__name__)
 CORS(app)
@@ -25,11 +26,11 @@ def run_simulation():
         [8, 0, 0, 0, 4, 0, 0, 20],
         [0, 20, 1, 0, 0, 12, 0, 0],
         [0, 0, 0, 9, 0, 0, 0, 0],
-        [7, 0, 3, 0, 20, 0, 0, 0],
-        [10, 0, 0, 6, 0, 0, 0, 0],
-        [20, 5, 0, 0, 0, 0, 2, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 7, 0, 0, 3, 0, 20, 0],
+        [0, 11, 0, 0, 0, 0, 0, 0],
+        [10, 0, 0, 0, 6, 0, 0, 0],
+        [0, 0, 5, 0, 0, 0, 2, 0],
+        [20, 0, 0, 0, 0, 0, 0, 0]
     ]
 
 
@@ -56,6 +57,9 @@ def run_simulation():
         report["result"] = "Gana el caballo negro"
     else:
         report["result"] = "Empate"
+
+    print("repor", report)
+    print("simulation", simulacion)
 
     # Retorna el conjunto de matrices de la simulación y el reporte final
     return jsonify({

@@ -4,6 +4,8 @@
 def mejor_hoja_max_profundidad(nodo_raiz, profundidad_objetivo):
     # Lista para almacenar los nodos en la profundidad objetivo
     hojas_en_profundidad = []
+    print("nodo raiz", nodo_raiz)
+    print("profundidad objetivo", profundidad_objetivo)
 
     def recorrer_nodos(nodo):
         if nodo.profundidad == profundidad_objetivo:
@@ -14,6 +16,7 @@ def mejor_hoja_max_profundidad(nodo_raiz, profundidad_objetivo):
 
     recorrer_nodos(nodo_raiz)
 
+    print("hojas en profundidad", hojas_en_profundidad)
 
     mejor_hoja = max(
         hojas_en_profundidad,

@@ -20,7 +20,7 @@ export class ServicesService {
 
   startSimulation(): Observable<any> {
     console.log('Starting simulation...');
-    return this.http.post<any>(`${this.baseUrl}/start`, {}).pipe(
+    return this.http.post<any>(`${this.baseUrl}/partida`, {}).pipe(
       tap(response => console.log('Simulation started, response:', response)),
       catchError(this.handleError)  // Manejo de errores
     );
