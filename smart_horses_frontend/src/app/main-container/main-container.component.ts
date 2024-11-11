@@ -21,6 +21,7 @@ export class MainContainerComponent {
   grid: number[][] = [];
   whiteHorsePoints: number = 0;
   blackHorsePoints: number = 0;
+  simulationInterval: any;
 
   constructor(private matrixService: ServicesService) {}
   ngOnInit() {
@@ -43,14 +44,39 @@ export class MainContainerComponent {
     );
   }
 
-  // Métodos para actualizar los puntos de cada jugador
-  updateWhiteHorsePoints(points: number): void {
-    this.whiteHorsePoints += points;
+  startSimulation(): void {
+    this.matrixService.startSimulation().subscribe(
+      response => {
+        if (response && response.simulation && response.report) {
+          const matrices = response.simulation; // Secuencia de matrices
+          const report = response.report; // Puntos finales
+          let index = 0;
+
+          if (this.simulationInterval) {
+            clearInterval(this.simulationInterval);
+          }
+
+
+          this.simulationInterval = setInterval(() => {
+            if (index < matrices.length) {
+              this.grid = matrices[index];
+              this.whiteHorsePoints = index === matrices.length - 1 ? report["Puntos IA 1, caballo blanco"] : this.whiteHorsePoints;
+              this.blackHorsePoints = index === matrices.length - 1 ? report["Puntos IA 2, caballo negro"] : this.blackHorsePoints;
+              index++;
+            } else {
+              // Stop the interval when we've shown all matrices
+              clearInterval(this.simulationInterval);
+              console.log("Simulation complete");
+            }
+          }, 1000); // Change interval time as needed (1000 ms = 1 second)
+
+        } else {
+          console.error('Simulation data or report not received');
+        }
+      },
+      error => {
+        console.error('Error during simulation:', error);
+      }
+    );
   }
-
-  updateBlackHorsePoints(points: number): void {
-    this.blackHorsePoints += points;
-  }
-
-
 }
