@@ -10,7 +10,6 @@ def construir_arbol(matriz_inicial, profundidad_maxima, valor_caballo_inicial, p
 
     while cola:
         nodo_actual = cola.pop(0)
-        print(f"Procesando nodo en profundidad {nodo_actual.profundidad} | Puntos Blanco: {nodo_actual.puntos_blanco} | Puntos Negro: {nodo_actual.puntos_negro}")
 
         if nodo_actual.profundidad >= profundidad_maxima:
             continue
@@ -44,21 +43,15 @@ def construir_arbol(matriz_inicial, profundidad_maxima, valor_caballo_inicial, p
             nodo_actual.hijos.append(nuevo_nodo)
             cola.append(nuevo_nodo)
 
-            print(f"Generado nodo hijo en profundidad {nuevo_nodo.profundidad} | Puntos Blanco: {nuevo_nodo.puntos_blanco} | Puntos Negro: {nuevo_nodo.puntos_negro}")
-
     return nodo_raiz
 
 
 def construir_arbol_blanco(matriz_inicial, profundidad_maxima, puntos_blanco, puntos_negro, dos_x):
     arbol= construir_arbol(matriz_inicial, profundidad_maxima, valor_caballo_inicial=11, puntos_blanco=puntos_blanco, puntos_negro=puntos_negro, dos_x=dos_x)
-    print("imprimir arbol que llega a mejor hoja")
-    imprimir_arbol(arbol)
     return arbol
 
 def construir_arbol_negro(matriz_inicial, profundidad_maxima, puntos_blanco, puntos_negro, dos_x):
     arbol= construir_arbol(matriz_inicial, profundidad_maxima, valor_caballo_inicial=12, puntos_blanco=puntos_blanco, puntos_negro=puntos_negro, dos_x=dos_x)
-    print("imprimir arbol que llega a mejor hoja")
-    imprimir_arbol(arbol)
     return arbol
 
 def imprimir_arbol(nodo, nivel=0):

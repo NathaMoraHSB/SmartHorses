@@ -1,5 +1,6 @@
 from src.functions.construir_arbol import construir_arbol_blanco, construir_arbol_negro
 from src.functions.mejor_hoja_max_profundidad import mejor_hoja_max_profundidad
+from src.functions.queda_un_movimiento import queda_un_solo_movimiento
 from src.functions.quedan_movimientos import quedan_movimientos
 
 matriz_inicial = [
@@ -41,7 +42,9 @@ def simular_partida(matriz_inicial):
         for fila in matriz_actual:
             print(fila)
 
-
+        ultimo_movimiento = queda_un_solo_movimiento(matriz_actual)
+        #si queda un solo movimiento los caballos cueden quedaarse jugando indefinidamente,
+        # depronto seleccionar el movimiento segun la heuristica a la ultima casilla con puntos
         if turno_blanco:
             arbol = construir_arbol_blanco(
                 matriz_actual, profundidad_maxima=2,
