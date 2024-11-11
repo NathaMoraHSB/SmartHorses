@@ -8,16 +8,16 @@
               'cell': true,
               'has-points': cell > 0 && cell <= 10,
               'multiplier': cell === 20,
-              'white-horse': cell === 11,
-              'black-horse': cell === 12
+              'W': cell === 11,
+              'B': cell === 12
             }">
 
           <ng-container *ngIf="cell === 11">
-            <img src="/assets/seahorse_white.png" alt="W" class="horse-image">
+            <img src="seahorse_white.png" alt="W" class="horse-image">
           </ng-container>
 
           <ng-container *ngIf="cell === 12">
-            <img src="/assets/seahorse_black.png" alt="B" class="horse-image">
+            <img src="seahorse_black.png" alt="B" class="horse-image">
           </ng-container>
 
           <ng-container *ngIf="cell === 20">x2</ng-container>
