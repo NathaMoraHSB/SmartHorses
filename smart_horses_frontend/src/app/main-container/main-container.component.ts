@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import { GridComponent } from "../grid/grid.component";
 import { MatCard, MatCardContent, MatCardHeader, MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -45,7 +45,7 @@ export class MainContainerComponent implements OnInit, OnChanges{
   juego_en_curso: boolean= false;
   turno_humano: boolean = false;
 
-  constructor(private matrixService: ServicesService) {}
+  constructor(private matrixService: ServicesService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.startMatrix();
@@ -163,13 +163,32 @@ export class MainContainerComponent implements OnInit, OnChanges{
     this.matrixService.sendHumanMove(data).subscribe(
       response => {
         console.log("Respuesta del backend:", response);
-        // Puedes actualizar el estado del componente aquí si es necesario
+
+        // Actualizar el estado del componente con la respuesta del backend
+        this.grid = response.matrix;
+        this.blackHorsePoints = response.blackHorsePoints;
+        this.dos_x_negro = response.dos_x_tomado;
+        this.whiteHorsePoints = response.whiteHorsePoints;
+        this.dos_x_blanco = response.dos_x_blanco;
+        this.difficultyLevel = response.difficultyLevel;
+        this.cdr.detectChanges();
+
+        // Opcional: Log para verificar los datos actualizados en el frontend
+        console.log("Estado actualizado en el frontend:", {
+          grid: this.grid,
+          blackHorsePoints: this.blackHorsePoints,
+          dos_x_negro: this.dos_x_negro,
+          whiteHorsePoints: this.whiteHorsePoints,
+          dos_x_blanco: this.dos_x_blanco,
+          difficultyLevel: this.difficultyLevel
+        });
       },
       error => {
         console.error("Error al enviar datos al backend:", error);
       }
     );
   }
+
 
   ngOnChanges(changes: SimpleChanges): void {
   }

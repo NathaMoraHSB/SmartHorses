@@ -2,18 +2,6 @@
 from .movimientos_posibles import movimientos_posibles
 
 def mover_caballo(matrix, x, y, por_dos=False):
-    """
-    Genera una lista de matrices resultantes al mover el caballo desde la posición (x, y)
-    a cada movimiento posible.
-
-    Parámetros:
-    matriz (List[List[int]]): La matriz inicial.
-    x (int): posición en el eje x (fila) del caballo.
-    y (int): posición en el eje y (columna) del caballo.
-
-    Retorna:
-    List[List[List[int]]]: Lista de matrices, cada una representando un movimiento posible del caballo.
-    """
     n = len(matrix)
     movimientos_validos = movimientos_posibles(x, y, n, matrix)
     valor_caballo = matrix[x][y]
