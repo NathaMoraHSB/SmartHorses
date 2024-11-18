@@ -20,7 +20,15 @@ export class ServicesService {
 
   startSimulation(): Observable<any> {
     console.log('Starting simulation...');
-    return this.http.post<any>(`${this.baseUrl}/partida`, {}).pipe(
+    return this.http.post<any>(`${this.baseUrl}/partidaIaVSIa`, {}).pipe(
+      tap(response => console.log('Simulation started, response:', response)),
+      catchError(this.handleError)  // Manejo de errores
+    );
+  }
+
+  startHumanVsMachineGame(): Observable<any> {
+    console.log('Solicitud de primera jugada a la maquina...');
+    return this.http.post<any>(`${this.baseUrl}/partidaIaVSIa`, {}).pipe(
       tap(response => console.log('Simulation started, response:', response)),
       catchError(this.handleError)  // Manejo de errores
     );
@@ -36,4 +44,13 @@ export class ServicesService {
     }
     return throwError('Something bad happened; please try again later.');
   }
+
+  sendHumanMove(data: any): Observable<any> {
+    console.log('Enviando movimiento del humano al backend...', data);
+    return this.http.post<any>(`${this.baseUrl}/human-move`, data).pipe(
+      tap(response => console.log('Movimiento enviado, respuesta del backend:', response)),
+      catchError(this.handleError)
+    );
+  }
+
 }

@@ -9,17 +9,27 @@ app = Flask(__name__)
 CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-matrix = random_matrix()
+#matrix = random_matrix()
+matrix =  [
+    [8, 0, 0, 0, 4, 0, 0, 20],
+    [0, 20, 1, 0, 0, 12, 0, 0],
+    [0, 0, 0, 9, 0, 0, 0, 0],
+    [0, 7, 0, 0, 3, 0, 20, 0],
+    [0, 11, 0, 0, 0, 0, 0, 0],
+    [10, 0, 0, 0, 6, 0, 0, 0],
+    [0, 0, 5, 0, 0, 0, 2, 0],
+    [20, 0, 0, 0, 0, 0, 0, 0]
+]
 
 
 @app.route('/api/start', methods=['POST'])
-def start_simulation():
+def start_matrix():
     if matrix:
         return jsonify({"matrix": matrix})
     else:
         return jsonify({"error": "File not found"}), 404
 
-@app.route('/api/partida', methods=['POST'])
+@app.route('/api/partidaIaVSIa', methods=['POST'])
 def run_simulation():
 
     matriz_inicial = [
@@ -66,6 +76,28 @@ def run_simulation():
         "simulation": simulacion,
         "report": report
     })
+
+#se recibe matriz inicial y todos los valores puntos caballo negro y caballo blanco, dos_x caballo blanco
+#@app.route('/api/machineMove', methods=['POST'])
+#def machine_move():
+
+@app.route('/api/human-move', methods=['POST'])
+def human_move():
+    # Obtener los datos enviados desde el frontend
+    data = request.get_json()
+
+    # Imprimir los datos en consola
+    print("Datos recibidos desde el frontend:", data)
+
+    # Responder al frontend con un mensaje de confirmación y los mismos datos
+    response = {
+        "message": "Datos recibidos",
+        "data": data
+    }
+
+    # Retornar la respuesta como JSON
+    return jsonify(response), 200
+
 
 
 if __name__ == '__main__':

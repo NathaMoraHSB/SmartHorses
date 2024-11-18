@@ -1,6 +1,5 @@
 <mat-card class="simulation-card">
   <mat-card-content>
-
     <table class="chess-board">
       <tr *ngFor="let row of grid; let rowIndex = index">
         <td *ngFor="let cell of row; let colIndex = index"
@@ -8,16 +7,17 @@
               'cell': true,
               'has-points': cell > 0 && cell <= 10,
               'multiplier': cell === 20,
-              'W': cell === 11,
-              'B': cell === 12
-            }">
-
+              'white-horse-cell': cell === 11,
+              'black-horse-cell': cell === 12,
+              'highlight': highlightCells.has(rowIndex + ',' + colIndex)
+            }"
+            (click)="onCellClick(rowIndex, colIndex)">
           <ng-container *ngIf="cell === 11">
-            <img src="seahorse_white.png" alt="W" class="horse-image">
+            <span style="font-size: 30px;">♞</span>
           </ng-container>
 
           <ng-container *ngIf="cell === 12">
-            <img src="seahorse_black.png" alt="B" class="horse-image">
+            <span style="font-size: 35px;">♞</span>
           </ng-container>
 
           <ng-container *ngIf="cell === 20">x2</ng-container>
@@ -27,3 +27,4 @@
     </table>
   </mat-card-content>
 </mat-card>
+
