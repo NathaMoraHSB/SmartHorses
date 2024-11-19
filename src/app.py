@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+from src.functions.codigo_completo import jugada_ia
 from src.functions.encontrar_posicion_caballo import encontrar_posicion_caballo
 from src.functions.mover_caballo import mover_caballo
 from src.functions.random_matrix import random_matrix
@@ -75,9 +76,44 @@ def run_simulation():
         "report": report
     })
 
-#se recibe matriz inicial y todos los valores puntos caballo negro y caballo blanco, dos_x caballo blanco
-#@app.route('/api/machineMove', methods=['POST'])
-#def machine_move():
+
+@app.route('/api/machineMove', methods=['POST'])
+def machine_move():
+
+    data = request.get_json()
+    matriz_actual = data.get('matrix')
+    white_horse_points = data.get('whiteHorsePoints')
+    black_horse_points = data.get('blackHorsePoints')
+    quedan_puntos = data.get('quedan_puntos')
+    dos_x_blanco = data.get('dos_x_blanco')
+    dos_x_negro = data.get('dos_x_negro')
+    difficulty_level = data.get('difficultyLevel')
+
+    # Seleccionar el mejor nodo usando la función `jugada_ia`
+    mejor_nodo = jugada_ia(matriz_actual)  # Esta función debería retornar el nodo con la mejor utilidad
+
+    # Actualizar los puntos basados en el mejor nodo
+    if mejor_nodo is not None:
+        # Supongamos que `mejor_nodo` tiene la estructura para actualizar los puntos
+        white_horse_points += mejor_nodo.puntos_blanco
+        black_horse_points += mejor_nodo.puntos_negro
+        nueva_matriz = mejor_nodo.matriz
+
+        # Preparar la respuesta con los datos actualizados
+        response = {
+            'matrix': nueva_matriz,
+            'whiteHorsePoints': white_horse_points,
+            'blackHorsePoints': black_horse_points,
+            'dos_x_blanco': dos_x_blanco,
+            'dos_x_negro': dos_x_negro,
+            'difficultyLevel': difficulty_level
+        }
+
+        return jsonify(response), 200
+    else:
+        # Manejar el caso en que no se haya encontrado un nodo adecuado
+        return jsonify({'error': 'No se encontró un movimiento adecuado para la IA'}), 400
+
 
 @app.route('/api/human-move', methods=['POST'])
 def human_move():

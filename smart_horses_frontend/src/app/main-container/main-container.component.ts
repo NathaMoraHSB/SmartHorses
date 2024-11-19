@@ -76,12 +76,6 @@ export class MainContainerComponent implements OnInit, OnChanges{
     }
   }
 
-  updateHumanTurn(): void {
-    this.turno_humano = true; // Activa el turno humano
-    console.log("updateHumanTurn called - turno_humano set to true.");
-
-  }
-
   runIaVsIaSimulation(): void {
     console.log("Running IA vs IA simulation...");
     /*this.matrixService.startSimulation().subscribe(
@@ -128,11 +122,14 @@ export class MainContainerComponent implements OnInit, OnChanges{
     this.juego_en_curso= false;
   }
 
-  machineTurn(){
+  machineTurn() {
     console.log("Turno de la maquina");
-    this.updateHumanTurn();
+    this.sendMachineMoveToBack();
+
+
 
   }
+
   runIaVsHumanSimulation(): void {
     console.log("Running IA vs Humano simulation...");
     this.machineTurn();
@@ -145,7 +142,7 @@ export class MainContainerComponent implements OnInit, OnChanges{
     const { row, col, matrix } = event;
     this.grid = matrix;
 
-    this.sendDataToBackend({
+    this.sendHumanMoveToBackend({
       matrix,
 
       selectedCell: { row, col },
@@ -156,15 +153,15 @@ export class MainContainerComponent implements OnInit, OnChanges{
       dos_x_negro: this.dos_x_negro,
       difficultyLevel: this.difficultyLevel
     });
+
   }
 
-  sendDataToBackend(data: any): void {
+  sendHumanMoveToBackend(data: any): void {
     console.log("Enviando datos al backend:", data);
     this.matrixService.sendHumanMove(data).subscribe(
       response => {
         console.log("Respuesta del backend:", response);
 
-        // Actualizar el estado del componente con la respuesta del backend
         this.grid = response.matrix;
         this.blackHorsePoints = response.blackHorsePoints;
         this.dos_x_negro = response.dos_x_tomado;
@@ -173,8 +170,7 @@ export class MainContainerComponent implements OnInit, OnChanges{
         this.difficultyLevel = response.difficultyLevel;
         this.cdr.detectChanges();
 
-        // Opcional: Log para verificar los datos actualizados en el frontend
-        console.log("Estado actualizado en el frontend:", {
+        console.log("Estado actualizado despues Human move:", {
           grid: this.grid,
           blackHorsePoints: this.blackHorsePoints,
           dos_x_negro: this.dos_x_negro,
@@ -187,7 +183,62 @@ export class MainContainerComponent implements OnInit, OnChanges{
         console.error("Error al enviar datos al backend:", error);
       }
     );
+    this.turno_humano=false
+
+    if (this.quedan_puntos) {
+      this.machineTurn();  // Llamar al turno de la máquina
+    } else {
+      this.endGame();
+    }
+
   }
+
+  sendMachineMoveToBack(): void {
+    const data = {
+      matrix: this.grid,
+      whiteHorsePoints: this.whiteHorsePoints,
+      blackHorsePoints: this.blackHorsePoints,
+      quedan_puntos: this.quedan_puntos,
+      dos_x_blanco: this.dos_x_blanco,
+      dos_x_negro: this.dos_x_negro,
+      difficultyLevel: this.difficultyLevel
+    };
+
+    // Enviar la información al backend usando el servicio
+    this.matrixService.sendMachineMove(data).subscribe(
+      response => {
+        console.log("Respuesta del backend después del turno de la máquina:", response);
+
+        // Actualizar el estado del componente con la respuesta del backend
+        this.grid = response.matrix;
+        this.whiteHorsePoints = response.whiteHorsePoints;
+        this.blackHorsePoints = response.blackHorsePoints;
+        this.dos_x_blanco = response.dos_x_blanco;
+        this.dos_x_negro = response.dos_x_negro;
+        this.quedan_puntos = response.quedan_puntos;
+
+        // Refrescar la vista para reflejar los cambios
+        this.cdr.detectChanges();
+
+      },
+      error => {
+        console.error("Error al enviar datos de machineTurn al backend:", error);
+      }
+    );
+
+    if (this.quedan_puntos) {
+      this.turno_humano= true;
+    } else {
+      this.endGame();
+    }
+  }
+  endGame(): void {
+    console.log("El juego ha terminado");
+    this.juego_en_curso = false;
+    // Puedes realizar más acciones al final del juego, como mostrar una alerta o reiniciar la interfaz.
+  }
+
+
 
 
   ngOnChanges(changes: SimpleChanges): void {

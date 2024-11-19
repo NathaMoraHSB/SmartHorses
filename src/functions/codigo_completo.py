@@ -1,32 +1,20 @@
 import random
+from collections import deque
+
 
 # Clase Nodo
 class Nodo:
-    def __init__(self, matriz, puntos_blanco, puntos_negro, dos_x, profundidad, padre=None):
+    def __init__(self, matriz, puntos_blanco=0, puntos_negro=0, dos_x_blanco=False, dos_x_negro=False, profundidad=0, utilidad=0, padre=None):
         self.matriz = matriz
         self.puntos_blanco = puntos_blanco
         self.puntos_negro = puntos_negro
-        self.dos_x = dos_x
+        self.dos_x_blanco = dos_x_blanco
+        self.dos_x_negro = dos_x_negro
         self.profundidad = profundidad
         self.padre = padre
         self.hijos = []
+        self.utilidad = utilidad
 
-""""# Genera una matriz aleatoria
-def random_matrix(size=8):
-    matrix = [[0 for _ in range(size)] for _ in range(size)]
-    point_positions = random.sample([(i, j) for i in range(size) for j in range(size)], 10)
-    for pos in point_positions:
-        matrix[pos[0]][pos[1]] = random.randint(1, 10)
-
-    x2_positions = random.sample([pos for pos in [(i, j) for i in range(size) for j in range(size)] if pos not in point_positions], 4)
-    for pos in x2_positions:
-        matrix[pos[0]][pos[1]] = 20
-
-    horse_positions = random.sample([pos for pos in [(i, j) for i in range(size) for j in range(size)] if pos not in point_positions and pos not in x2_positions], 2)
-    matrix[horse_positions[0][0]][horse_positions[0][1]] = 11
-    matrix[horse_positions[1][0]][horse_positions[1][1]] = 12
-
-    return matrix"""
 
 matriz_prueba = [
     [8, 0, 0, 0, 4, 0, 0, 20],
@@ -39,7 +27,10 @@ matriz_prueba = [
     [20, 0, 0, 0, 0, 0, 0, 0]
 ]
 
-# Encuentra la posición del caballo
+def crear_nodo_raiz(matriz):
+    nodo_raiz = Nodo(matriz)
+    return nodo_raiz
+
 def encontrar_posicion_caballo(matriz, valor_caballo):
     for i in range(len(matriz)):
         for j in range(len(matriz[i])):
@@ -91,56 +82,172 @@ def mover_caballo(matrix, x, y, por_dos=False, posicion_previa=None):
 
         nueva_matriz[x][y] = 0
         nueva_matriz[nx][ny] = valor_caballo
-
-        print(f"Generando movimiento a posición {(nx, ny)} desde {(x, y)} con puntos: {puntos}")
         resultados.append((nueva_matriz, puntos, dos_x))
 
     return resultados
 
-def construir_arbol(matriz_inicial, profundidad_maxima, valor_caballo_inicial, puntos_blanco=0, puntos_negro=0, dos_x=False):
-    cola = []
-    nodos_visitados = set()
+def generar_hijos(nodo, valor_caballo):
 
-    nodo_raiz = Nodo(matriz_inicial, puntos_blanco=puntos_blanco, puntos_negro=puntos_negro, dos_x=dos_x, profundidad=0)
-    cola.append((nodo_raiz, None))
-    print("Iniciando construcción del árbol con nodo raíz")
+    posicion_caballo = encontrar_posicion_caballo(nodo.matriz, valor_caballo)
+    if not posicion_caballo:
+        print("no se encontró la posición del caballo")
+        return []  # No se encontró el caballo en el tablero
 
-    while cola:
-        nodo_actual, posicion_previa = cola.pop(0)
+    x, y = posicion_caballo
+    por_dos = nodo.dos_x_blanco if valor_caballo == 11 else nodo.dos_x_negro
+    hijos = []
 
-        if nodo_actual.profundidad >= profundidad_maxima:
-            print(f"Nodo alcanzó profundidad máxima: {nodo_actual.profundidad}")
-            continue
+    posibles_movimientos = mover_caballo(nodo.matriz, x, y, por_dos)
 
-        estado_actual = tuple(map(tuple, nodo_actual.matriz))
-        if (estado_actual, nodo_actual.profundidad) in nodos_visitados:
-            print("Estado ya visitado en esta profundidad, omitiendo")
-            continue
-        nodos_visitados.add((estado_actual, nodo_actual.profundidad))
+    for nueva_matriz, puntos, dos_x in posibles_movimientos:
 
-        valor_caballo = valor_caballo_inicial if nodo_actual.profundidad % 2 == 0 else (12 if valor_caballo_inicial == 11 else 11)
-        posicion_caballo = encontrar_posicion_caballo(nodo_actual.matriz, valor_caballo)
+        if valor_caballo == 11:  # Caballo blanco
+            puntos_blanco = nodo.puntos_blanco + puntos
+            puntos_negro = nodo.puntos_negro
+            dos_x_blanco = dos_x
+            dos_x_negro = nodo.dos_x_negro
+        else:
+            puntos_blanco = nodo.puntos_blanco
+            puntos_negro = nodo.puntos_negro + puntos
+            dos_x_blanco = nodo.dos_x_blanco
+            dos_x_negro = dos_x
 
-        if posicion_caballo is None:
-            print(f"No se encontró el caballo {valor_caballo} en el estado actual. Saltando nodo.")
-            continue
+        # Crea el nodo hijo
+        nodo_hijo = Nodo(
+            nueva_matriz,
+            puntos_blanco,
+            puntos_negro,
+            dos_x_blanco,
+            dos_x_negro,
+            nodo.profundidad + 1,
+            0,  # La utilidad se calculará después
+            nodo
+        )
+        hijos.append(nodo_hijo)
+        nodo.hijos.append(nodo_hijo)
+    return hijos
 
-        x, y = posicion_caballo
-        print(f"Expandiendo nodo en profundidad {nodo_actual.profundidad}, posición del caballo: {(x, y)}")
+def crear_arbol(matriz, profundidad_maxima):
 
-        movimientos = mover_caballo(nodo_actual.matriz, x, y, nodo_actual.dos_x, posicion_previa)
-
-        for nueva_matriz, puntos, dos_x_nuevo in movimientos:
-            nuevo_puntos_blanco = nodo_actual.puntos_blanco + puntos if valor_caballo == 11 else nodo_actual.puntos_blanco
-            nuevo_puntos_negro = nodo_actual.puntos_negro + puntos if valor_caballo == 12 else nodo_actual.puntos_negro
-            nuevo_nodo = Nodo(nueva_matriz, nuevo_puntos_blanco, nuevo_puntos_negro, dos_x_nuevo, nodo_actual.profundidad + 1, nodo_actual)
-
-            print(f"Creando nodo en profundidad {nuevo_nodo.profundidad} - Puntos Blanco: {nuevo_puntos_blanco}, Puntos Negro: {nuevo_puntos_negro}")
-
-            nodo_actual.hijos.append(nuevo_nodo)
-            cola.append((nuevo_nodo, posicion_caballo))
-
+    nodo_raiz = crear_nodo_raiz(matriz)
+    _expandir_nodo(nodo_raiz, profundidad_maxima)
     return nodo_raiz
+
+def _expandir_nodo(nodo, profundidad_maxima):
+    if nodo.profundidad >= profundidad_maxima:
+        return
+
+    if nodo.profundidad < profundidad_maxima:
+        nodo.utilidad = -20000 if nodo.profundidad % 2 == 0 else 20000
+
+    valor_caballo = 11 if nodo.profundidad % 2 == 0 else 12
+
+    hijos = generar_hijos(nodo, valor_caballo)
+
+    for hijo in hijos:
+        _expandir_nodo(hijo, profundidad_maxima)
+
+def utilidad_1(nodo):
+    utilidad = nodo.puntos_blanco - nodo.puntos_negro
+
+    if nodo.dos_x_blanco:
+        utilidad += 10
+
+    nodo.utilidad = utilidad
+    return utilidad
+
+def utilidad_2(nodo):
+    utilidad = nodo.puntos_blanco - nodo.puntos_negro
+
+    if nodo.dos_x_blanco:
+        utilidad += 5
+
+    nodo.utilidad = utilidad
+    return utilidad
+
+def asignar_utilidad_y_encolar(nodo_raiz, profundidad_maxima):
+    cola = deque()
+
+    def recorrer_y_asignar(nodo):
+        if nodo.profundidad == profundidad_maxima:
+            utilidad_1(nodo)
+
+        cola.append(nodo)
+
+        for hijo in nodo.hijos:
+            recorrer_y_asignar(hijo)
+
+    recorrer_y_asignar(nodo_raiz)
+    return cola
+
+def utilidad_min(nodos_hijos):
+    if not nodos_hijos:
+        return None  # Si no hay hijos, no se puede calcular la utilidad mínima
+
+    # Encontrar el nodo con la utilidad mínima
+    min_utilidad = min(nodo.utilidad for nodo in nodos_hijos)
+    return min_utilidad
+
+
+def utilidad_max(nodos_hijos):
+    if not nodos_hijos:
+        return None  # Si no hay hijos, no se puede calcular la utilidad máxima
+
+
+    max_utilidad = max(nodo.utilidad for nodo in nodos_hijos)
+    return max_utilidad
+
+def podar_arbol_en_cola(cola):
+    profundidad_maxima = max(nodo.profundidad for nodo in cola)
+    if profundidad_maxima % 2 != 0:
+        print("La profundidad máxima no es par, ajustando el proceso.")
+        return
+
+    while profundidad_maxima > 1:
+        nivel_utilidad = "min" if profundidad_maxima % 2 == 0 else "max"
+        padres_visitados = set()
+
+        for nodo in list(cola):  # Crear una copia para poder modificar `cola` en el lugar
+            if nodo.profundidad == profundidad_maxima:
+                padre = nodo.padre
+                if padre and padre not in padres_visitados:
+                    hijos_utilidades = [hijo.utilidad for hijo in padre.hijos if hijo.profundidad == profundidad_maxima]
+                    padre.utilidad = min(hijos_utilidades) if nivel_utilidad == "min" else max(hijos_utilidades)
+                    padres_visitados.add(padre)
+                cola.remove(nodo)  # Remover nodos en profundidad máxima directamente en `cola`
+
+        profundidad_maxima -= 1
+
+def seleccionar_mejor_nodo(cola):
+    # Suponiendo que 'utilidad' es el atributo que queremos maximizar
+    mejor_nodo = None
+    mejor_utilidad = float('-inf')  # Inicializar con el valor más bajo posible
+
+    for nodo in cola:
+        if nodo.utilidad > mejor_utilidad:
+            mejor_utilidad = nodo.utilidad
+            mejor_nodo = nodo
+
+    return mejor_nodo
+
+def jugada_ia(matriz):
+    # Paso 1: Crear el nodo raíz con la matriz proporcionada
+    nodo_raiz = crear_nodo_raiz(matriz)
+
+    # Paso 2: Crear el árbol hasta la profundidad máxima deseada (4 en este caso)
+    profundidad_maxima = 4
+    arbol = crear_arbol(nodo_raiz.matriz, profundidad_maxima)
+
+    # Paso 3: Asignar utilidades en los nodos de máxima profundidad y encolar todo el árbol
+    cola = asignar_utilidad_y_encolar(arbol, profundidad_maxima)
+
+    # Paso 4: Podar el árbol en la cola, reduciendo la profundidad intercalando min y max
+    podar_arbol_en_cola(cola)
+
+    # Paso 5: Seleccionar el nodo de mejor utilidad
+    mejor_nodo = seleccionar_mejor_nodo(cola)
+
+    return mejor_nodo
 
 # Heurística de IA1: maximiza puntos blancos
 def heuristic_ia1(nodo):
@@ -150,16 +257,7 @@ def heuristic_ia1(nodo):
 def heuristic_ia2(nodo):
     return nodo.puntos_blanco + nodo.puntos_negro * 0.5 + (10 if nodo.dos_x else 0)
 
-# Encuentra la mejor hoja con heurística variable
-def mejor_hoja_max_profundidad(nodo_raiz, profundidad_objetivo, heuristic):
-    hojas_en_profundidad = []
-    def recorrer_nodos(nodo):
-        if nodo.profundidad == profundidad_objetivo:
-            hojas_en_profundidad.append(nodo)
-        for hijo in nodo.hijos:
-            recorrer_nodos(hijo)
-    recorrer_nodos(nodo_raiz)
-    return max(hojas_en_profundidad, key=heuristic, default=None)
+
 
 # Define la profundidad según el nivel de dificultad
 def nivel_de_dificultad(nivel):
@@ -173,7 +271,7 @@ def nivel_de_dificultad(nivel):
         raise ValueError("Nivel no válido. Debe ser 1 (Principiante), 2 (Amateur) o 3 (Experto).")
 
 # Simula una partida entre IA1 y IA2
-def simular_partida(matriz_inicial, nivel, ia1_heuristic, ia2_heuristic):
+"""def simular_partida(matriz_inicial, nivel, ia1_heuristic, ia2_heuristic):
     profundidad_maxima = nivel_de_dificultad(nivel)
     matriz_actual = matriz_inicial
     turno_blanco = True
@@ -208,14 +306,46 @@ def ejecutar_simulaciones(num_simulaciones, nivel):
             resultados["IA2_wins"] += 1
         else:
             resultados["Empates"] += 1
-    return resultados
+    return resultados"""
+
+def imprimir_arbol(nodo, nivel=0):
+    # Imprime la información del nodo actual
+    indent = "  " * nivel
+    print(f"{indent}Nodo en profundidad {nodo.profundidad} - Puntos Blanco: {nodo.puntos_blanco}, Puntos Negro: {nodo.puntos_negro}, Utilidad: {nodo.utilidad}")
+    print(f"{indent}dos_x_blanco: {nodo.dos_x_blanco}, dos_x_negro: {nodo.dos_x_negro}")
+    for fila in nodo.matriz:
+        print(f"{indent}{fila}")
+    print("\n")
+
+    # Llama recursivamente para imprimir los hijos
+    for hijo in nodo.hijos:
+        imprimir_arbol(hijo, nivel + 1)
 
 
+def main():
+    global matriz_prueba
+    # Paso 1: Crear el nodo raíz con la matriz de prueba
+    nodo_raiz = crear_nodo_raiz(matriz_prueba)
 
-# Ejecuta la simulación si el script se ejecuta directamente
+    # Paso 2: Crear el árbol hasta la profundidad máxima deseada (4 en este caso)
+    profundidad_maxima = 4
+    arbol= crear_arbol(nodo_raiz.matriz, profundidad_maxima)
+
+    # Paso 3: Asignar utilidades en los nodos de máxima profundidad y encolar todo el árbol
+    cola = asignar_utilidad_y_encolar(arbol, profundidad_maxima)
+
+    # Paso 4: Podar el árbol en la cola, reduciendo la profundidad intercalando min y max
+    podar_arbol_en_cola(cola)
+    mejor_nodo = seleccionar_mejor_nodo(cola)
+
+    # Imprimir la información del mejor nodo
+    print("Nodo de mejor utilidad:")
+    print(f"Utilidad: {mejor_nodo.utilidad}, Puntos Blanco: {mejor_nodo.puntos_blanco}, Puntos Negro: {mejor_nodo.puntos_negro}")
+    print("Matriz:")
+    for fila in mejor_nodo.matriz:
+        print(fila)
+
+# Ejecutar la función principal si el script se ejecuta directamente
 if __name__ == "__main__":
-    nivel = 1  # Cambia el nivel según corresponda (1, 2 o 3)
-    num_simulaciones = 1
-    resultados = ejecutar_simulaciones(num_simulaciones, nivel)
-    print(f"Resultados de {num_simulaciones} simulaciones en nivel {nivel}:")
-    print(f"IA1 ganó {resultados['IA1_wins']} veces, IA2 ganó {resultados['IA2_wins']} veces, Empates: {resultados['Empates']}")
+    main()
+

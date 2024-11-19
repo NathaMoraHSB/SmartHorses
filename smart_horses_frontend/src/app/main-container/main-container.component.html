@@ -13,9 +13,7 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Tarjetas de Resultados -->
     <div class="results-container">
-      <!-- Tarjeta del Caballo Blanco -->
       <mat-card class="player-card">
         <mat-card-header>
           <mat-card-title>White Horse</mat-card-title>
@@ -26,18 +24,16 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Tarjeta del Caballo Negro -->
       <mat-card class="player-card">
         <mat-card-header>
           <mat-card-title>Black Horse</mat-card-title>
-          <mat-card-subtitle>Jugador: IA 2</mat-card-subtitle>
+          <mat-card-subtitle>Jugador: {{ humanVSmachine ? 'Humano' : 'IA 2' }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <p>Puntos acumulados: {{ blackHorsePoints }}</p>
         </mat-card-content>
       </mat-card>
 
-      <!-- Tarjeta de resultados del juego -->
       <mat-card class="player-card" *ngIf="!quedan_puntos">
         <mat-card-header>
           <mat-card-title>Juego terminado</mat-card-title>

@@ -53,4 +53,13 @@ export class ServicesService {
     );
   }
 
+  sendMachineMove(data: any): Observable<any> {
+    console.log('Enviando movimiento de la máquina al backend...', data);
+    return this.http.post<any>(`${this.baseUrl}/machineMove`, data).pipe(
+      tap(response => console.log('Movimiento de la máquina enviado, respuesta del backend:', response)),
+      catchError(this.handleError)
+    );
+  }
+
+
 }
