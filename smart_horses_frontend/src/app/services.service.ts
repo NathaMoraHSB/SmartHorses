@@ -82,4 +82,12 @@ export class ServicesService {
     );
   }
 
+  getExperimentResults(): Observable<any> {
+    console.log('Obteniendo resultados de los experimentos...');
+    return this.http.get<any>(`${this.baseUrl}/run-experiments`).pipe(
+      tap(response => console.log('Resultados de los experimentos recibidos:', response)),
+      catchError(this.handleError)
+    );
+  }
+
 }

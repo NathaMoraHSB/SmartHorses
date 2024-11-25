@@ -2,6 +2,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from game_app import GameApp
+from collections import defaultdict
+from ai_game import AIGame
 
 app = Flask(__name__)
 CORS(app)
@@ -81,9 +83,6 @@ def handle_ai_turn():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-
 @app.route('/api/update-difficulty', methods=['POST'])
 def update_difficulty():
     data = request.json
@@ -112,6 +111,57 @@ def quedan_puntos():
     quedan = game.board.quedan_puntos()
     return jsonify({"quedan_puntos": quedan}), 200
 
+@app.route('/api/run-experiments', methods=['GET'])
+def run_experiments():
+    """Ejecuta experimentos y devuelve resultados organizados en JSON"""
+    print("corriendo experimentos")
+    difficulty_levels = {
+        'Principiante': 2,
+        'Amateur': 4,
+        'Experto': 6
+    }
+
+    results = defaultdict(lambda: defaultdict(lambda: [0, 0, 0]))
+    total_ai1, total_ai2, total_draws = 0, 0, 0
+
+    for ai1_level in difficulty_levels:
+        for ai2_level in difficulty_levels:
+            for game in range(10):
+                game = AIGame(difficulty_levels[ai1_level], difficulty_levels[ai2_level])
+                result = game.play_game()
+
+                if result == 1:
+                    results[ai1_level][ai2_level][0] += 1
+                    total_ai1 += 1
+                elif result == 2:
+                    results[ai1_level][ai2_level][1] += 1
+                    total_ai2 += 1
+                else:
+                    results[ai1_level][ai2_level][2] += 1
+                    total_draws += 1
+
+    # Enviar solo los valores necesarios
+    experiments = {
+        "totals": {
+            "ia1": total_ai1,
+            "ia1_percentage": round((total_ai1 / (total_ai1 + total_ai2 + total_draws)) * 100, 2),
+            "ia2": total_ai2,
+            "ia2_percentage": round((total_ai2 / (total_ai1 + total_ai2 + total_draws)) * 100, 2),
+            "draws": total_draws,
+            "draws_percentage": round((total_draws / (total_ai1 + total_ai2 + total_draws)) * 100, 2),
+        },
+        "details": {
+            ai1_level: {
+                ai2_level: {
+                    "wins_ai1": results[ai1_level][ai2_level][0],
+                    "wins_ai2": results[ai1_level][ai2_level][1],
+                    "draws": results[ai1_level][ai2_level][2]
+                } for ai2_level in difficulty_levels
+            } for ai1_level in difficulty_levels
+        }
+    }
+
+    return jsonify(experiments)
 
 if __name__ == '__main__':
     app.run(debug=True)

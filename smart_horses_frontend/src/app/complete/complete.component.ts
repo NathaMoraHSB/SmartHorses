@@ -1,4 +1,15 @@
-import {ChangeDetectorRef, Component, Input, Output, EventEmitter, OnChanges, OnInit, OnDestroy, SimpleChanges
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  OnInit,
+  OnDestroy,
+  SimpleChanges,
+  TemplateRef,
+  ViewChild
 } from '@angular/core';
 import { MatCard, MatCardContent, MatCardHeader, MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -9,6 +20,7 @@ import { FormsModule } from "@angular/forms";
 import { CommonModule, NgIf, NgClass } from "@angular/common";
 import { HttpClientModule } from "@angular/common/http";
 import { ServicesService } from "../services.service";
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-complete',
@@ -17,12 +29,13 @@ import { ServicesService } from "../services.service";
     MatCard, MatCardContent, MatCardHeader, MatCardModule,
     MatFormFieldModule, MatSelectModule, MatRadioModule,
     MatButtonModule, FormsModule, NgIf, NgClass,
-    CommonModule, HttpClientModule
+    CommonModule, HttpClientModule, MatDialogModule
   ],
   templateUrl: './complete.component.html',
   styleUrls: ['./complete.component.css']
 })
 export class CompleteComponent implements OnInit {
+  @ViewChild('experimentResultsTemplate') experimentResultsTemplate!: TemplateRef<any>;
   grid: number[][] = [];
   turno_humano: boolean = true;
   whiteHorsePoints: number = 0;
@@ -33,6 +46,7 @@ export class CompleteComponent implements OnInit {
 
   juego_en_curso: boolean = false;
   humanVSmachine: boolean = false;
+  isExperiment: boolean= false;
   difficultyLevel: number = 2;
   simulationInterval: any;
 
@@ -42,6 +56,7 @@ export class CompleteComponent implements OnInit {
   constructor(
     private matrixService: ServicesService,
     private cdr: ChangeDetectorRef,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -64,14 +79,19 @@ export class CompleteComponent implements OnInit {
   }
 
   startSimulation(): void {
-    this.juego_en_curso = true;
-    this.set_dificulty();
-    if (!this.humanVSmachine) {
-      this.runIaVsIaSimulation();
-    } else {
-      this.runIaVsHumanSimulation();
-      this.humanVSmachine=true
+    if(this.isExperiment){
+      this.openExperimentDialog();
+    }else{
+      this.juego_en_curso = true;
+      this.set_dificulty();
+      if (!this.humanVSmachine) {
+        this.runIaVsIaSimulation();
+      } else {
+        this.runIaVsHumanSimulation();
+        this.humanVSmachine=true
+      }
     }
+
   }
 
   runIaVsIaSimulation(): void {
@@ -102,7 +122,7 @@ export class CompleteComponent implements OnInit {
               this.quedan_puntos = false;
               console.log("Final Report:", report);
             }
-          }, 2000);
+          }, 1000);
         } else {
           console.error("Simulation data or report not received");
         }
@@ -294,5 +314,45 @@ export class CompleteComponent implements OnInit {
     this.startMatrix();
     this.juego_en_curso= false;
     this.turno_humano= false;
+    this.isExperiment = false;
   }
+
+  openExperimentDialog(): void {
+    this.matrixService.getExperimentResults().subscribe((response: any) => {
+      const processedData = this.prepareExperimentData(response);
+
+      const dialogRef = this.dialog.open(this.experimentResultsTemplate, {
+        width: '600px',
+        data: processedData,
+      });
+
+      dialogRef.afterClosed().subscribe(() => {
+        console.log('El diálogo fue cerrado.');
+        this.resetGame(); // Reinicia el juego
+      });
+    });
+  }
+
+
+  prepareExperimentData(data: any): { rows: any[], totals: any } {
+    const rows: { ai1: string; values: string[] }[] = []; // Define 'values' como un array de strings
+    const totals = data.totals;
+
+    const difficultyLevels: string[] = ['Principiante', 'Amateur', 'Experto'];
+
+    for (const ai1Level of difficultyLevels) {
+      const row: { ai1: string; values: string[] } = { ai1: ai1Level, values: [] }; // Especifica el tipo explícito
+      for (const ai2Level of difficultyLevels) {
+        const result = data.details[ai1Level][ai2Level];
+        row.values.push(`${result.wins_ai1}-${result.wins_ai2}-${result.draws}`);
+      }
+      rows.push(row);
+    }
+
+    return { rows, totals };
+  }
+
+
+
+
 }

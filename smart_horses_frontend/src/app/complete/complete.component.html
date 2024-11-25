@@ -76,7 +76,6 @@
 
           <p *ngIf="whiteHorsePoints > blackHorsePoints">Caballo blanco: {{ whiteHorsePoints }}</p>
           <p *ngIf="blackHorsePoints > whiteHorsePoints">Caballo negro: {{ blackHorsePoints }}</p>
-
           <p *ngIf="whiteHorsePoints === blackHorsePoints">Empate, puntos: {{ whiteHorsePoints }}</p>
         </mat-card-content>
       </mat-card>
@@ -99,7 +98,7 @@
           <mat-radio-group class="settings-group" [disabled]="juego_en_curso">
             <mat-radio-button value="false" (change)="humanVSmachine = false">IA vs IA</mat-radio-button>
             <mat-radio-button value="true" (change)="humanVSmachine = true">IA vs Humano</mat-radio-button>
-            <mat-radio-button value="true" (change)="humanVSmachine = true">Experimento</mat-radio-button>
+            <mat-radio-button value="true" (change)="isExperiment = true">Experimento</mat-radio-button>
           </mat-radio-group>
 
 
@@ -111,4 +110,34 @@
   </div>
 
 </div>
+
+
+<ng-template #experimentResultsTemplate let-data>
+  <h1 mat-dialog-title>Resultados Finales</h1>
+  <div mat-dialog-content>
+    <table>
+      <thead>
+      <tr>
+        <th>IA1 vs IA2</th>
+        <th>Principiante</th>
+        <th>Amateur</th>
+        <th>Experto</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let row of data.rows">
+        <td>{{ row.ai1 }}</td>
+        <td *ngFor="let value of row.values">{{ value }}</td>
+      </tr>
+      </tbody>
+    </table>
+    <p>Total IA1: {{ data.totals.ia1 }} ({{ data.totals.ia1_percentage }}%)</p>
+    <p>Total IA2: {{ data.totals.ia2 }} ({{ data.totals.ia2_percentage }}%)</p>
+    <p>Empates: {{ data.totals.draws }} ({{ data.totals.draws_percentage }}%)</p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button mat-dialog-close>Cerrar</button>
+  </div>
+</ng-template>
+
 
