@@ -2,12 +2,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from src.functions.encontrar_posicion_caballo import encontrar_posicion_caballo
-from src.functions.mover_caballo import mover_caballo
-from src.functions.random_matrix import random_matrix
-from src.functions.simular_partida import simular_partida
-
-
 app = Flask(__name__)
 CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -36,44 +30,7 @@ def start_matrix():
     else:
         return jsonify({"error": "File not found"}), 404
 
-@app.route('/api/partidaIaVSIa', methods=['POST'])
-def run_simulation():
 
-    global matrix
-
-
-    historial_jugadas = simular_partida(matrix)
-
-
-    report = {
-        "result": "",
-        "Puntos IA 1, caballo blanco": 0,
-        "Puntos IA 2, caballo negro": 0
-    }
-
-    simulacion = []
-
-    for nodo in historial_jugadas:
-        simulacion.append(nodo.matriz)  # Agrega la matriz actual a la simulación
-        report["Puntos IA 1, caballo blanco"] = nodo.puntos_blanco
-        report["Puntos IA 2, caballo negro"] = nodo.puntos_negro
-
-    # Determina el ganador según los puntos finales
-    if report["Puntos IA 1, caballo blanco"] > report["Puntos IA 2, caballo negro"]:
-        report["result"] = "Gana el caballo blanco"
-    elif report["Puntos IA 1, caballo blanco"] < report["Puntos IA 2, caballo negro"]:
-        report["result"] = "Gana el caballo negro"
-    else:
-        report["result"] = "Empate"
-
-    print("repor", report)
-    print("simulation", simulacion)
-
-    # Retorna el conjunto de matrices de la simulación y el reporte final
-    return jsonify({
-        "simulation": simulacion,
-        "report": report
-    })
 
 #se recibe matriz inicial y todos los valores puntos caballo negro y caballo blanco, dos_x caballo blanco
 #@app.route('/api/machineMove', methods=['POST'])
